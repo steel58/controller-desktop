@@ -1,35 +1,54 @@
-#include<libusb-1.0/libusb.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include<libusb-1.0/libusb.h>
 
-int main(void) {
-    libusb_context *ctx;
-    int init = libusb_init_context(&ctx, NULL, 0);
-    printf("%d", LIBUSB_ERROR_IO);
+int main(int argc, char **argv) {
+    int status;
+    unsigned char value = 0;
 
-    //if (init != 0) {
-    //    printf("Error initializing libusb");
-    //    return 1;
-    //}
+    status = libusb_init(NULL);
+    if (status !=0) {
+        perror("Error init libusb");
+        return -status;
+    }
 
-    //libusb_device **list;
-    //libusb_device *found = NULL;
-    //ssize_t cnt = libusb_get_device_list(NULL, &list);
-    //ssize_t i = 0;
-    //int err = 0;
+    libusb_device_handle *devh = NULL;
 
-    //if (cnt < 0) {
-    //    return 0;
-    //}
+    devh = libusb_open_device_with_vid_pid(NULL, 0x0079, 0x1844);
+    if (devh == NULL) {
+        printf("Error! Could not find USB device!\n");
+        libusb_exit(NULL);
+        return -1;
+    }
 
-    //for (i = 0; i < cnt; i++) {
-    //    libusb_device *device = list[i];
-    //    libusb_device_handle *handle;
+    int byte_count;
 
-    //    
+    status = libusb_interrupt_transfer(devh, 0x81, &value, 64, &byte_count, 100); 
+    if (status != 0) {
+        printf("This did not read\n");
+        perror("Error this");
+        libusb_close(devh);
+        libusb_exit(NULL);
+        return -status;
+    }
 
-    //}
+    printf("The byte count is: %d\n", byte_count);
+    printf("The data read is: %d\n", value);
+    
 
-    //libusb_free_device_list(list, 1);
-    libusb_exit(ctx);
+   // int running = 1;
+   // while (running) {
+   //     value = 0;
+   //     printf("Halfway!");
+   //     status = libusb_control_transfer(dev, 0xC0, 0x2, 0, 0, (unsigned char *) &value, 1, 100);
+   //     if (status > 0) {
+   //         printf("ITS ALIVE!!!!");
+   //     }
+   // }
+
+
+    libusb_close(devh);
+    libusb_exit(NULL);
     return 0;
 }
