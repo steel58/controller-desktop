@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     status = libusb_interrupt_transfer(devh, 0x81, &value, 64, &byte_count, 100); 
     if (status != 0) {
         printf("This did not read\n");
-        perror("Error this");
+        perror("Error reading from device");
         libusb_close(devh);
         libusb_exit(NULL);
         return -status;
